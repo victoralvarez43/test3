@@ -91,7 +91,6 @@ Luego en la Enum, añadimos al constructor las factorias concretas, y por ultimo
      * 
      * 	- Name
      *  - WebDriverFactory
-     *  - BroserManager impl
      *  
      * @param browserName
      * @param webDriverFactory
