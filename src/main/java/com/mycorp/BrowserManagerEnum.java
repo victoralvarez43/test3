@@ -1,7 +1,5 @@
 package com.mycorp;
 
-import java.util.function.Supplier;
-
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -11,6 +9,7 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 
+import com.mycorp.webdriver.CreateConcreteDriver;
 import com.mycorp.webdriver.NoneDriver;
 
 import io.github.bonigarcia.wdm.BrowserManager;
@@ -25,14 +24,14 @@ import io.github.bonigarcia.wdm.VoidDriverManager;
 
 public enum BrowserManagerEnum {
 
-	CHROME( "chrome",() -> new ChromeDriver(), ChromeDriverManager.getInstance().version( "2.24" ) ),
-    FIREFOX( "firefox", () -> new FirefoxDriver(), FirefoxDriverManager.getInstance() ),
-    EDGE( "edge", () -> new EdgeDriver(), EdgeDriverManager.getInstance() ),
-    IE( "ie", () -> new InternetExplorerDriver(), InternetExplorerDriverManager.getInstance() ),
-    MARIONETTE( "marionette", () -> new FirefoxDriver(), FirefoxDriverManager.getInstance() ),
-    OPERA( "opera", () -> new OperaDriver(), OperaDriverManager.getInstance() ),
-    PHANTOMJS( "phantomjs", () -> new PhantomJSDriver(), PhantomJsDriverManager.getInstance() ),
-    NONE( "test", () -> new NoneDriver(), VoidDriverManager.getInstance().version( "1" ) );
+	CHROME( "chrome", new CreateConcreteDriver<ChromeDriver>(ChromeDriver.class), ChromeDriverManager.getInstance().version( "2.24" ) ),
+    FIREFOX( "firefox", new CreateConcreteDriver<FirefoxDriver>(FirefoxDriver.class), FirefoxDriverManager.getInstance() ),
+    EDGE( "edge", new CreateConcreteDriver<EdgeDriver>(EdgeDriver.class), EdgeDriverManager.getInstance() ),
+    IE( "ie", new CreateConcreteDriver<InternetExplorerDriver>(InternetExplorerDriver.class), InternetExplorerDriverManager.getInstance() ),
+    MARIONETTE( "marionette", new CreateConcreteDriver<FirefoxDriver>(FirefoxDriver.class), FirefoxDriverManager.getInstance() ),
+    OPERA( "opera", new CreateConcreteDriver<OperaDriver>(OperaDriver.class), OperaDriverManager.getInstance() ),
+    PHANTOMJS( "phantomjs", new CreateConcreteDriver<PhantomJSDriver>(PhantomJSDriver.class), PhantomJsDriverManager.getInstance() ),
+    NONE( "test", new CreateConcreteDriver<NoneDriver>(NoneDriver.class), VoidDriverManager.getInstance().version( "1" ) );
 
 	// Browser Name
 	private final String browserName;
@@ -40,24 +39,24 @@ public enum BrowserManagerEnum {
 	// Browser Manager
     private final BrowserManager browserManager;
     
-    // Supplier to construct webDriver
-    private final Supplier<WebDriver> webDriverSupplier;
+    // Concrete Driver by reflection
+    private final CreateConcreteDriver<?> createConcreteDriver;
     
     /**
      * Construct Browser Enum with:
      * 
      * 	- Name
-     *  - Supplier WebDriver impl
+     *  - CreateConcreteDriver
      *  - BroserManager impl
      *  
      * @param browserName
-     * @param webDriverSupplier
+     * @param CreateConcreteDriver
      * @param browserManager
      */
-    private BrowserManagerEnum( final String browserName, final Supplier<WebDriver> webDriverSupplier, final BrowserManager browserManager ) {
+    private BrowserManagerEnum( final String browserName, final CreateConcreteDriver<?> createConcreteDriver, final BrowserManager browserManager ) {
         this.browserName = browserName;
         this.browserManager = browserManager;
-        this.webDriverSupplier = webDriverSupplier;
+        this.createConcreteDriver = createConcreteDriver;
     }
 
     /**
@@ -99,9 +98,11 @@ public enum BrowserManagerEnum {
      * Get Driver.
      * 
      * @return
+     * @throws IllegalAccessException 
+     * @throws InstantiationException 
      */
-    public WebDriver getDriver() {
-        return this.webDriverSupplier.get();
+    public WebDriver getDriver() throws InstantiationException, IllegalAccessException {
+        return this.createConcreteDriver.newElement();
     }
 
 }
