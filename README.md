@@ -1,7 +1,7 @@
 # test3
 
->
-Generación JAR
+
+## Generación JAR
 
 >
 Simplemente utilizando maven se puede realizar el package:
@@ -9,10 +9,15 @@ Simplemente utilizando maven se puede realizar el package:
 >
 mvn clean package
 
+> ------------------
 
-> Hay varias soluciones posibles:
+>He incluido este git en travis para poder tener entorno de CI.
 
-	- La solución que he implementado en el proyecto, se trata de crear una factoría para crear los WebDriver, que deben implementar todas las factorías de cada navegador.
+>[https://travis-ci.org/victoralvarez43/test3](https://travis-ci.org/victoralvarez43/test3)
+
+## Posibles Soluciones:
+
+* **La solución que he implementado en el proyecto, se trata de crear una factoría para crear los WebDriver, que deben implementar todas las factorías de cada navegador.**
 	
 ```java
 
@@ -35,7 +40,7 @@ public interface WebDriverFactory<T extends WebDriver> {
 
 ```
 
-	Y por ejemplo la implementacion para Firefox:
+Y por ejemplo la implementación para Firefox:
 	
 ```java
 
@@ -57,7 +62,7 @@ public class FirefoxFactory implements WebDriverFactory<FirefoxDriver>{
 
 ```
 
-	Luego en la Enum, añadimos al constructor las factorias concretas y los browser manager concretos para cada caso, y por ultimo en el metodo getDriver se obtiene el driver concreto mediante la ejecución del metodo newElement():
+Luego en la Enum, añadimos al constructor las factorias concretas y los browser manager concretos para cada caso, y por ultimo en el metodo getDriver se obtiene el driver concreto mediante la ejecución del metodo newElement():
 	
 ```java
 
@@ -104,15 +109,15 @@ public class FirefoxFactory implements WebDriverFactory<FirefoxDriver>{
 	
 ```
 
-	He optado por esta solución porque aunque a priori parezca que se crean demasiadas clases para simplemente un constructor en cada una de ellas, lo veo muy útil para el futuro, primero definimos una interfaz que se puede ir aumentando con nuevas funcionalidades que surjan en un futuro, ademas de tener un buen patrón de factoría implementado y que cada clase sera la encargada de crear su correspondiente driver, y esto significa que por ejemplo podamos tener diferentes configuraciones parametrizadas ya bien con perfiles maven o resources o caches o bbdd o etc. para diferentes entornos, situaciones, etc.
+He optado por esta solución porque aunque a priori parezca que se crean demasiadas clases para simplemente un constructor en cada una de ellas, lo veo muy útil para el futuro, primero definimos una interfaz que se puede ir aumentando con nuevas funcionalidades que surjan en un futuro, ademas de tener un buen patrón de factoría implementado y que cada clase sera la encargada de crear su correspondiente driver, y esto significa que por ejemplo podamos tener diferentes configuraciones parametrizadas ya bien con perfiles maven o resources o caches o bbdd o etc. para diferentes entornos, situaciones, etc.
 	
-	A parte también se podría crear una nueva librería con esta parte para tenerlo separado, esta claro que para este ejemplo no es adecuado, pero si esta parte creciera demasiado podría ser un modulo nuevo e independiente.
+A parte también se podría crear una nueva librería con esta parte para tenerlo separado, esta claro que para este ejemplo no es adecuado, pero si esta parte creciera demasiado podría ser un modulo nuevo e independiente.
 	
-	En cambio en las otras dos opciones no podríamos modificar la creacción de un driver concreto sin afectar al resto.
+En cambio en las otras dos opciones no podríamos modificar la creacción de un driver concreto sin afectar al resto.
 
 > ------------------
 
-	- Mediante reflection, lo primero nos apoyamos en una clase para crear los driver dependiendo de su class
+* *Mediante reflection, lo primero nos apoyamos en una clase para crear los driver dependiendo de su class*
 
 
 ```java
@@ -141,7 +146,7 @@ public class CreateConcreteDriver<T extends WebDriver> {
 
 ```
 
-	Entonces a la hora de crear las enumeraciones lo hacemos así:
+Entonces a la hora de crear las enumeraciones lo hacemos así:
 	
 ```java
 
@@ -193,14 +198,14 @@ public class CreateConcreteDriver<T extends WebDriver> {
 
 ```
 
->	Con esta solución se añaden nuevas exceptions que se deben controlar.
+** Con esta solución se añaden nuevas exceptions que se deben controlar. **
 
 > ------------------
 
-	-	Utilizando Java 8:
+* *Utilizando Java 8:*
 
 
-	Quitamos los switch de ambos métodos getBrowserManager y getDriver, y añadimos al constructor de la enum BrowserManager y WebDriver y quedaría así:
+Quitamos los switch de ambos métodos getBrowserManager y getDriver, y añadimos al constructor de la enum BrowserManager y WebDriver y quedaría así:
 
 ```java
 	private final String browserName;
@@ -214,13 +219,13 @@ public class CreateConcreteDriver<T extends WebDriver> {
 	}
 ```
 
-	Y luego por ejemplo para CHROME seria:
+Y luego por ejemplo para CHROME seria:
 	
 ```java
 	CHROME( "chrome", new ChromeDriver(), ChromeDriverManager.getInstance().version( "2.24" ))
 ```
 	
-	Pero así nos daría fallo al no estar preparada la infraestructura para dichos driver, entonces entra en juego Java 8 y si no me equivoco lo más adecuado para aquí seria una FuntionalInterface y 	concretamente la Supplier, ya que es la utilizada para creacción de objetos, en este caso seria algo así:
+Pero así nos daría fallo al no estar preparada la infraestructura para dichos driver, entonces entra en juego Java 8 y si no me equivoco lo más adecuado para aquí seria una FuntionalInterface y concretamente la Supplier, ya que es la utilizada para creacción de objetos, en este caso seria algo así:
 	
 ```java
 	CHROME( "chrome",() -> new ChromeDriver(), ChromeDriverManager.getInstance().version( "2.24" ) ),
