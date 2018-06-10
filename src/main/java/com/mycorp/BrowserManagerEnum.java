@@ -6,32 +6,21 @@ import org.openqa.selenium.WebDriver;
 import com.mycorp.webdriver.*;
 
 import io.github.bonigarcia.wdm.BrowserManager;
-import io.github.bonigarcia.wdm.ChromeDriverManager;
-import io.github.bonigarcia.wdm.EdgeDriverManager;
-import io.github.bonigarcia.wdm.FirefoxDriverManager;
-import io.github.bonigarcia.wdm.InternetExplorerDriverManager;
-import io.github.bonigarcia.wdm.OperaDriverManager;
-import io.github.bonigarcia.wdm.PhantomJsDriverManager;
-import io.github.bonigarcia.wdm.VoidDriverManager;
-
 
 public enum BrowserManagerEnum {
 
-	CHROME( "chrome", new ChromeFactory(), ChromeDriverManager.getInstance().version( "2.24" ) ),
-    FIREFOX( "firefox", new FirefoxFactory(), FirefoxDriverManager.getInstance() ),
-    EDGE( "edge", new EdgeFactory(), EdgeDriverManager.getInstance() ),
-    IE( "ie", new InternetExplorerFactory(), InternetExplorerDriverManager.getInstance() ),
-    MARIONETTE( "marionette", new FirefoxFactory(), FirefoxDriverManager.getInstance() ),
-    OPERA( "opera", new OperaFactory(), OperaDriverManager.getInstance() ),
-    PHANTOMJS( "phantomjs", new PhantomJSFactory(), PhantomJsDriverManager.getInstance() ),
-    NONE( "test", new NoneFactory(), VoidDriverManager.getInstance().version( "1" ) );
+	CHROME( "chrome", new ChromeFactory() ),
+    FIREFOX( "firefox", new FirefoxFactory() ),
+    EDGE( "edge", new EdgeFactory() ),
+    IE( "ie", new InternetExplorerFactory() ),
+    MARIONETTE( "marionette", new FirefoxFactory() ),
+    OPERA( "opera", new OperaFactory() ),
+    PHANTOMJS( "phantomjs", new PhantomJSFactory() ),
+    NONE( "test", new NoneFactory() );
 
 	// Browser Name
 	private final String browserName;
 	
-	// Browser Manager
-    private final BrowserManager browserManager;
-    
     // WebDriverFactory
     private final WebDriverFactory<?> webDriverFactory;
     
@@ -40,15 +29,13 @@ public enum BrowserManagerEnum {
      * 
      * 	- Name
      *  - WebDriverFactory
-     *  - BroserManager impl
      *  
      * @param browserName
      * @param CreateConcreteDriver
      * @param browserManager
      */
-    private BrowserManagerEnum( final String browserName, final WebDriverFactory<?> webDriverFactory, final BrowserManager browserManager ) {
+    private BrowserManagerEnum( final String browserName, final WebDriverFactory<?> webDriverFactory ) {
         this.browserName = browserName;
-        this.browserManager = browserManager;
         this.webDriverFactory = webDriverFactory;
     }
 
@@ -74,7 +61,7 @@ public enum BrowserManagerEnum {
      * @return
      */
     public BrowserManager getBrowserManager() {
-    	return this.browserManager;
+    	return this.webDriverFactory.getBrowserManager();
     }
 
     /**

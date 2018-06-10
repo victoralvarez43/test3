@@ -17,7 +17,7 @@ mvn clean package
 
 ## Posibles Soluciones:
 
-* **La solución que he implementado en el proyecto, se trata de crear una factoría para crear los WebDriver, que deben implementar todas las factorías de cada navegador.**
+* **La solución que he implementado en el proyecto, se trata de crear una factoría para crear los Driver y obtener los Manager, que deben implementar todas las factorías de cada navegador.**
 	
 ```java
 
@@ -36,6 +36,13 @@ public interface WebDriverFactory<T extends WebDriver> {
 	 * @return
 	 */
 	public T newElement();
+	
+	/**
+	 * Get Browser Manager.
+	 * 
+	 * @return
+	 */
+	public BrowserManager getBrowserManager();
 }
 
 ```
@@ -56,25 +63,26 @@ public class FirefoxFactory implements WebDriverFactory<FirefoxDriver>{
 	public FirefoxDriver newElement() {
 		return new FirefoxDriver();
 	}
-
+	
+	@Override
+	public BrowserManager getBrowserManager() {
+		return FirefoxDriverManager.getInstance();
+	}
 }
 
 
 ```
 
-Luego en la Enum, añadimos al constructor las factorias concretas y los browser manager concretos para cada caso, y por ultimo en el metodo getDriver se obtiene el driver concreto mediante la ejecución del metodo newElement():
+Luego en la Enum, añadimos al constructor las factorias concretas, y por ultimo en el metodo getDriver se obtiene el driver concreto mediante la ejecución del metodo newElement() y en el metodo getBrowserManager se obtiene el manager mediante la ejecución del metodo getBrowserManager():
 	
 ```java
 
-	CHROME( "chrome", new ChromeFactory(), ChromeDriverManager.getInstance().version( "2.24" ) ),
+	CHROME( "chrome", new ChromeFactory() ),
 	...
 	
 	// Browser Name
 	private final String browserName;
 	
-	// Browser Manager
-    private final BrowserManager browserManager;
-    
     // WebDriverFactory
     private final WebDriverFactory<?> webDriverFactory;
     
@@ -86,12 +94,10 @@ Luego en la Enum, añadimos al constructor las factorias concretas y los browser
      *  - BroserManager impl
      *  
      * @param browserName
-     * @param CreateConcreteDriver
-     * @param browserManager
+     * @param webDriverFactory
      */
-    private BrowserManagerEnum( final String browserName, final WebDriverFactory<?> webDriverFactory, final BrowserManager browserManager ) {
+    private BrowserManagerEnum( final String browserName, final WebDriverFactory<?> webDriverFactory ) 		{
         this.browserName = browserName;
-        this.browserManager = browserManager;
         this.webDriverFactory = webDriverFactory;
     }
 
@@ -105,11 +111,20 @@ Luego en la Enum, añadimos al constructor las factorias concretas y los browser
     public WebDriver getDriver() throws InstantiationException, IllegalAccessException {
         return this.webDriverFactory.newElement();
     }
+    
+    /**
+     * Get Browser Manager.
+     * 
+     * @return
+     */
+    public BrowserManager getBrowserManager() {
+    	return this.webDriverFactory.getBrowserManager();
+    }
 
 	
 ```
 
-He optado por esta solución porque aunque a priori parezca que se crean demasiadas clases para simplemente un constructor en cada una de ellas, lo veo muy útil para el futuro, primero definimos una interfaz que se puede ir aumentando con nuevas funcionalidades que surjan en un futuro, ademas de tener un buen patrón de factoría implementado y que cada clase sera la encargada de crear su correspondiente driver, y esto significa que por ejemplo podamos tener diferentes configuraciones parametrizadas ya bien con perfiles maven o resources o caches o bbdd o etc. para diferentes entornos, situaciones, etc.
+He optado por esta solución porque aunque a priori parezca que se crean demasiadas clases para simplemente un constructor y un get en cada una de ellas, lo veo muy útil para el futuro, primero definimos una interfaz que se puede ir aumentando con nuevas funcionalidades que surjan en un futuro, ademas de tener un buen patrón de factoría implementado y que cada clase sera la encargada de crear su correspondiente driver, y esto significa que por ejemplo podamos tener diferentes configuraciones parametrizadas ya bien con perfiles maven o resources o caches o bbdd o etc. para diferentes entornos, situaciones, etc.
 	
 A parte también se podría crear una nueva librería con esta parte para tenerlo separado, esta claro que para este ejemplo no es adecuado, pero si esta parte creciera demasiado podría ser un modulo nuevo e independiente.
 	

@@ -2,6 +2,9 @@ package com.mycorp.webdriver;
 
 import org.openqa.selenium.ie.InternetExplorerDriver;
 
+import io.github.bonigarcia.wdm.BrowserManager;
+import io.github.bonigarcia.wdm.InternetExplorerDriverManager;
+
 /**
  * Factory to create Internet Explorer browser driver.
  * 
@@ -13,6 +16,11 @@ public class InternetExplorerFactory implements WebDriverFactory<InternetExplore
 	@Override
 	public InternetExplorerDriver newElement() {
 		return new InternetExplorerDriver();
+	}
+
+	@Override
+	public BrowserManager getBrowserManager() {
+		return InternetExplorerDriverManager.getInstance();
 	}
 
 }

@@ -2,6 +2,8 @@ package com.mycorp.webdriver;
 
 import org.openqa.selenium.WebDriver;
 
+import io.github.bonigarcia.wdm.BrowserManager;
+
 /**
  * Interface that must be implemented by all the specific factories of browsers.
  *  
@@ -17,4 +19,11 @@ public interface WebDriverFactory<T extends WebDriver> {
 	 * @return
 	 */
 	public T newElement();
+	
+	/**
+	 * Get Browser Manager.
+	 * 
+	 * @return
+	 */
+	public BrowserManager getBrowserManager();
 }
