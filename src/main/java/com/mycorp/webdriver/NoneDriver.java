@@ -9,6 +9,12 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.Response;
 
+/**
+ * WebDriver for mock browser.
+ * 
+ * @author victor
+ *
+ */
 public class NoneDriver extends RemoteWebDriver {
 
 	public NoneDriver() {

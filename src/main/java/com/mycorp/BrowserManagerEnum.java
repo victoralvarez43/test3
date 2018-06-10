@@ -1,5 +1,7 @@
 package com.mycorp;
 
+import java.util.function.Supplier;
+
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -23,21 +25,47 @@ import io.github.bonigarcia.wdm.VoidDriverManager;
 
 public enum BrowserManagerEnum {
 
-    CHROME( "chrome" ),
-    FIREFOX( "firefox" ),
-    EDGE( "edge" ),
-    IE( "ie" ),
-    MARIONETTE( "marionette" ),
-    OPERA( "opera" ),
-    PHANTOMJS( "phantomjs" ),
-    NONE( "test" );
+	CHROME( "chrome",() -> new ChromeDriver(), ChromeDriverManager.getInstance().version( "2.24" ) ),
+    FIREFOX( "firefox", () -> new FirefoxDriver(), FirefoxDriverManager.getInstance() ),
+    EDGE( "edge", () -> new EdgeDriver(), EdgeDriverManager.getInstance() ),
+    IE( "ie", () -> new InternetExplorerDriver(), InternetExplorerDriverManager.getInstance() ),
+    MARIONETTE( "marionette", () -> new FirefoxDriver(), FirefoxDriverManager.getInstance() ),
+    OPERA( "opera", () -> new OperaDriver(), OperaDriverManager.getInstance() ),
+    PHANTOMJS( "phantomjs", () -> new PhantomJSDriver(), PhantomJsDriverManager.getInstance() ),
+    NONE( "test", () -> new NoneDriver(), VoidDriverManager.getInstance().version( "1" ) );
 
-    private final String browserName;
-
-    private BrowserManagerEnum( final String browserName ) {
+	// Browser Name
+	private final String browserName;
+	
+	// Browser Manager
+    private final BrowserManager browserManager;
+    
+    // Supplier to construct webDriver
+    private final Supplier<WebDriver> webDriverSupplier;
+    
+    /**
+     * Construct Browser Enum with:
+     * 
+     * 	- Name
+     *  - Supplier WebDriver impl
+     *  - BroserManager impl
+     *  
+     * @param browserName
+     * @param webDriverSupplier
+     * @param browserManager
+     */
+    private BrowserManagerEnum( final String browserName, final Supplier<WebDriver> webDriverSupplier, final BrowserManager browserManager ) {
         this.browserName = browserName;
+        this.browserManager = browserManager;
+        this.webDriverSupplier = webDriverSupplier;
     }
 
+    /**
+     * Return Browser Enum represented by its name.
+     * 
+     * @param browserName
+     * @return
+     */
     public static BrowserManagerEnum of( final String browserName ) {
         final String lBrowserName = StringUtils.lowerCase( browserName );
         for( final BrowserManagerEnum browser : BrowserManagerEnum.values() ) {
@@ -48,34 +76,32 @@ public enum BrowserManagerEnum {
         return NONE;
     }
 
+    /**
+     * Get Browser Manager.
+     * 
+     * @return
+     */
     public BrowserManager getBrowserManager() {
-        switch( this ) {
-        case CHROME:        return ChromeDriverManager.getInstance().version( "2.24" );
-        case FIREFOX:       return FirefoxDriverManager.getInstance();
-        case EDGE:          return EdgeDriverManager.getInstance();
-        case IE:            return InternetExplorerDriverManager.getInstance();
-        case MARIONETTE:    return FirefoxDriverManager.getInstance();
-        case OPERA:         return OperaDriverManager.getInstance();
-        case PHANTOMJS:     return PhantomJsDriverManager.getInstance();
-        case NONE: default: return VoidDriverManager.getInstance().version( "1" );
-        }
+    	return this.browserManager;
     }
 
+    /**
+     * Get Browser Manager by version.
+     * 
+     * @param version
+     * @return
+     */
     public BrowserManager getBrowserManager( final String version ) {
         return getBrowserManager().version( version );
     }
 
+    /**
+     * Get Driver.
+     * 
+     * @return
+     */
     public WebDriver getDriver() {
-        switch( this ) {
-        case CHROME:     return new ChromeDriver();
-        case FIREFOX:    return new FirefoxDriver();
-        case EDGE:       return new EdgeDriver();
-        case IE:         return new InternetExplorerDriver();
-        case MARIONETTE: return new FirefoxDriver();
-        case OPERA:      return new OperaDriver();
-        case PHANTOMJS:  return new PhantomJSDriver();
-        case NONE: default: return new NoneDriver();            
-        }
+        return this.webDriverSupplier.get();
     }
 
 }
