@@ -2,15 +2,8 @@ package com.mycorp;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.opera.OperaDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
 
-import com.mycorp.webdriver.CreateConcreteDriver;
-import com.mycorp.webdriver.NoneDriver;
+import com.mycorp.webdriver.*;
 
 import io.github.bonigarcia.wdm.BrowserManager;
 import io.github.bonigarcia.wdm.ChromeDriverManager;
@@ -24,14 +17,14 @@ import io.github.bonigarcia.wdm.VoidDriverManager;
 
 public enum BrowserManagerEnum {
 
-	CHROME( "chrome", new CreateConcreteDriver<ChromeDriver>(ChromeDriver.class), ChromeDriverManager.getInstance().version( "2.24" ) ),
-    FIREFOX( "firefox", new CreateConcreteDriver<FirefoxDriver>(FirefoxDriver.class), FirefoxDriverManager.getInstance() ),
-    EDGE( "edge", new CreateConcreteDriver<EdgeDriver>(EdgeDriver.class), EdgeDriverManager.getInstance() ),
-    IE( "ie", new CreateConcreteDriver<InternetExplorerDriver>(InternetExplorerDriver.class), InternetExplorerDriverManager.getInstance() ),
-    MARIONETTE( "marionette", new CreateConcreteDriver<FirefoxDriver>(FirefoxDriver.class), FirefoxDriverManager.getInstance() ),
-    OPERA( "opera", new CreateConcreteDriver<OperaDriver>(OperaDriver.class), OperaDriverManager.getInstance() ),
-    PHANTOMJS( "phantomjs", new CreateConcreteDriver<PhantomJSDriver>(PhantomJSDriver.class), PhantomJsDriverManager.getInstance() ),
-    NONE( "test", new CreateConcreteDriver<NoneDriver>(NoneDriver.class), VoidDriverManager.getInstance().version( "1" ) );
+	CHROME( "chrome", new ChromeFactory(), ChromeDriverManager.getInstance().version( "2.24" ) ),
+    FIREFOX( "firefox", new FirefoxFactory(), FirefoxDriverManager.getInstance() ),
+    EDGE( "edge", new EdgeFactory(), EdgeDriverManager.getInstance() ),
+    IE( "ie", new InternetExplorerFactory(), InternetExplorerDriverManager.getInstance() ),
+    MARIONETTE( "marionette", new FirefoxFactory(), FirefoxDriverManager.getInstance() ),
+    OPERA( "opera", new OperaFactory(), OperaDriverManager.getInstance() ),
+    PHANTOMJS( "phantomjs", new PhantomJSFactory(), PhantomJsDriverManager.getInstance() ),
+    NONE( "test", new NoneFactory(), VoidDriverManager.getInstance().version( "1" ) );
 
 	// Browser Name
 	private final String browserName;
@@ -39,28 +32,28 @@ public enum BrowserManagerEnum {
 	// Browser Manager
     private final BrowserManager browserManager;
     
-    // Concrete Driver by reflection
-    private final CreateConcreteDriver<?> createConcreteDriver;
+    // WebDriverFactory
+    private final WebDriverFactory<?> webDriverFactory;
     
     /**
      * Construct Browser Enum with:
      * 
      * 	- Name
-     *  - CreateConcreteDriver
+     *  - WebDriverFactory
      *  - BroserManager impl
      *  
      * @param browserName
      * @param CreateConcreteDriver
      * @param browserManager
      */
-    private BrowserManagerEnum( final String browserName, final CreateConcreteDriver<?> createConcreteDriver, final BrowserManager browserManager ) {
+    private BrowserManagerEnum( final String browserName, final WebDriverFactory<?> webDriverFactory, final BrowserManager browserManager ) {
         this.browserName = browserName;
         this.browserManager = browserManager;
-        this.createConcreteDriver = createConcreteDriver;
+        this.webDriverFactory = webDriverFactory;
     }
 
     /**
-     * Return Browser Enum represented by its name.
+     * Return Browser Enum represented by its browser name.
      * 
      * @param browserName
      * @return
@@ -102,7 +95,7 @@ public enum BrowserManagerEnum {
      * @throws InstantiationException 
      */
     public WebDriver getDriver() throws InstantiationException, IllegalAccessException {
-        return this.createConcreteDriver.newElement();
+        return this.webDriverFactory.newElement();
     }
 
 }
