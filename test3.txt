@@ -1,5 +1,1 @@
-<<<<<<< HEAD
 bbaa
-=======
-aaa
->>>>>>> branch1
